@@ -4,12 +4,17 @@
   box-sizing: border-box;
 }
 
-.App {
+.clock-wrap {
   text-align: center;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+}
+.clock-wrap.is-night {
+  background-color: #333;
+  color: #fff;
 }
 
 .time {
@@ -24,6 +29,17 @@
   overflow-wrap: break-word;
 }
 
-/* .dust { */
-  /* font-size: 1.5rem; */
-/* } */
+.toolbar {
+  position: fixed;
+  top: 0;
+  height: 44px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+.toolbar > button {
+  appearance: none;
+  border: none;
+  background-color: transparent;
+}
