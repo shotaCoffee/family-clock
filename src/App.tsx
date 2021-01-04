@@ -1,10 +1,10 @@
-import React, { useState} from 'react';
+import React, {useState} from 'react';
 import './App.css';
 
 const App = () => {
   return (
     <div className="App">
-      <Clock />
+      <Clock/>
     </div>
   );
 }
@@ -13,25 +13,29 @@ export default App;
 
 const Clock = () => {
   const [time, setTime] = useState('');
+  const [day, setDay] = useState('');
   const [dustDay, setDustDay] = useState('');
-  const setClock = () => {
-    const myDay = new Array("日","月","火","水","木","金","土");
-    const now  = new Date();
-    const year = now.getFullYear(); // 年
-    const month = now.getMonth()+1; // 月
-    const date = now.getDate(); // 日
-    const day = now.getDay();
-    let hour = now.getHours(); // 時
-    let min  = now.getMinutes(); // 分
-    let sec  = now.getSeconds(); // 秒
+  const JAPANESE_DAY = ['日', '月', '火', '水', '木', '金', '土'];
 
-    // 数値が1桁の場合、頭に0を付けて2桁で表示する指定
-    if(hour < 10) { hour = 0 + hour; }
-    if(min < 10) { min = 0 + min; }
-    if(sec < 10) { sec = 0 + sec; }
-    
-    setTime(year + '/' + month + '/' + date + '（' + myDay[day] + '）'  + hour + ':' + min + ':' + sec);
-    setDustDay(getDustDay(myDay[day]))
+  const setClock = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    let month: string | number = now.getMonth() + 1;
+    let date: string | number = now.getDate();
+    let day: string | number = now.getDay();
+    let hour: string | number = now.getHours();
+    let min: string | number = now.getMinutes();
+    let sec: string | number = now.getSeconds();
+
+    hour = convertDouble(hour)
+    min = convertDouble(min)
+    sec = convertDouble(sec)
+    date = convertDouble(date)
+    month = convertDouble(month)
+
+    setTime(hour + ':' + min + ':' + sec);
+    setDay(year + '/' + month + '/' + date + '（' + JAPANESE_DAY[day] + '）');
+    setDustDay(getDustDay(JAPANESE_DAY[day + 1]))
   }
 
   window.setTimeout(() => {
@@ -40,7 +44,7 @@ const Clock = () => {
 
   const getDustDay = (day: string) => {
     let dust = '';
-    switch(day) {
+    switch (day) {
       case '月':
         dust = '燃えるごみ';
         break;
@@ -63,16 +67,23 @@ const Clock = () => {
     return dust
   }
 
+  const convertDouble = (value: string | number) => {
+    if (value < 10) {
+      return String(0 + value.toString())
+    }
+    return value
+  }
+
   return (
     <div className='clock-wrap'>
-      <div className='clock'>{time}</div>
-      {
-        dustDay === '' ? (
-          <p>明日は捨てられるものはないよ</p>
-        ): (
-          <p>明日のゴミ：{dustDay}</p>
-        )
-      }
+      <div className='time'>{time}</div>
+      <div className='day'>{day}
+        {
+          dustDay === '' ? null : (
+            <span className='dust'>明日のゴミ：{dustDay}</span>
+          )
+        }
+      </div>
     </div>
 
   )
