@@ -1,21 +1,39 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import styled from 'styled-components';
 import './App.css';
 import {convertDouble, getDustDay, JAPANESE_DAY} from './dust.service';
 import {Weather, WeatherAPIResponse} from './weatherAPIResponse';
 import 'es6-promise/auto';
 import 'fetch-polyfill';
+import {useLocalStorage} from './hooks/useLocalStorage';
 
 const REQUEST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=35.678569&lon=139.635952&&units=metric&lang=ja
 &exclude=minutely,hourly,daily,alerts&appid=${process.env.REACT_APP_WEATHER_API_KEY}`
+
+const STORAGE_KEY = 'storageHour'
 
 const App = () => {
   const [weather, setWeather] = useState<Weather[]>();
   const [current, setCurrent] = useState<WeatherAPIResponse>()
   const [loading, setLoading] = useState(true);
   const [isNight, setIsNight] = useState(true);
+  const [hour, setHour] = useState<number | string>(0);
+  const [min, setMin] = useState<number | string>(0);
+  const [sec, setSec] = useState<number | string>(0);
+  const [day, setDay] = useState('');
+  const [dustDay, setDustDay] = useState('');
+  const {setStorage, getStorage} = useLocalStorage();
 
-  useEffect(() => {
+  const fetchWeather = async () => {
+    const res = await fetch(REQUEST_URL);
+    if (res.ok) {
+      return await res.json()
+    } else {
+      console.log(res.status)
+    }
+  }
+
+  const load = useCallback(() => {
     setLoading(true);
     fetchWeather()
       .then(value => {
@@ -27,24 +45,13 @@ const App = () => {
       .then(() => {
         setLoading(false)
       })
-  }, []);
+  },[])
 
-  const fetchWeather = async () => {
-    const res = await fetch(REQUEST_URL);
-    if (res.ok) {
-      return await res.json()
-    } else {
-      console.log(res.status)
-    }
-  }
+  useEffect(() => {
+    load()
+  }, [load]);
 
-  const [hour, setHour] = useState<number | string>(0);
-  const [min, setMin] = useState<number | string>(0);
-  const [sec, setSec] = useState<number | string>(0);
-  const [day, setDay] = useState('');
-  const [dustDay, setDustDay] = useState('');
-
-  const setClock = () => {
+  const setClock = useCallback(() => {
     const now = new Date();
     const year = now.getFullYear();
     let month: string | number = now.getMonth() + 1;
@@ -60,6 +67,17 @@ const App = () => {
     date = convertDouble(date)
     month = convertDouble(month)
 
+    setHour(hour);
+    setMin(min);
+    setSec(sec);
+    setDay(year + '/' + month + '/' + date + '（' + JAPANESE_DAY[day] + '）');
+    setDustDay(getDustDay(JAPANESE_DAY[day + 1]));
+    checkNightTheme(hour);
+    setStorage(STORAGE_KEY, hour);
+
+  }, [setStorage])
+
+  const checkNightTheme = (hour: string | number) => {
     // 18時からナイトテーマ 7時からはライトテーマ
     if (0 <= hour && hour <= 5) {
       setIsNight(true);
@@ -70,20 +88,22 @@ const App = () => {
     if (19 <= hour && hour <= 24) {
       setIsNight(true)
     }
-
-    setHour(hour);
-    setMin(min);
-    setSec(sec);
-    setDay(year + '/' + month + '/' + date + '（' + JAPANESE_DAY[day] + '）');
-    setDustDay(getDustDay(JAPANESE_DAY[day + 1]))
   }
+
+  const checkWeather = useCallback(() => {
+    const storageHour = getStorage(STORAGE_KEY);
+    const currentHour = hour.toString();
+    if ((Number(currentHour) - Number(storageHour)) > 3) {
+      load()
+    }
+  }, [getStorage, hour, load])
 
   useEffect(() => {
     setInterval(() => {
-      setClock()
-    }, 1000)
-  }, [])
-
+      setClock();
+      checkWeather();
+    }, 1000);
+  }, [checkWeather, setClock]);
 
   return (
     <Container isNight={isNight}>

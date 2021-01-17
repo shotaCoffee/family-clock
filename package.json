@@ -44,5 +44,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/react-hooks": "^5.0.0",
+    "jest-localstorage-mock": "^2.4.6"
   }
 }
