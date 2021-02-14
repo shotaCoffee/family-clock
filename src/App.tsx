@@ -6,9 +6,8 @@ import {Weather, WeatherAPIResponse} from './weatherAPIResponse';
 import 'es6-promise/auto';
 import 'fetch-polyfill';
 import {useLocalStorage} from './hooks/useLocalStorage';
+import {fetchWeather} from './weatcher.service';
 
-const REQUEST_URL = `https://api.openweathermap.org/data/2.5/onecall?lat=35.678569&lon=139.635952&&units=metric&lang=ja
-&exclude=minutely,hourly,daily,alerts&appid=${process.env.REACT_APP_WEATHER_API_KEY}`
 
 const STORAGE_KEY = 'storageHour'
 
@@ -23,15 +22,6 @@ const App = () => {
   const [day, setDay] = useState('');
   const [dustDay, setDustDay] = useState('');
   const {setStorage, getStorage} = useLocalStorage();
-
-  const fetchWeather = async () => {
-    const res = await fetch(REQUEST_URL);
-    if (res.ok) {
-      return await res.json()
-    } else {
-      console.log(res.status)
-    }
-  }
 
   const load = useCallback(() => {
     setLoading(true);

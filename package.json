@@ -11,6 +11,7 @@
     "@types/react": "^16.14.2",
     "@types/react-dom": "^16.9.10",
     "@types/styled-components": "^5.1.7",
+    "date-fns": "^2.17.0",
     "es6-promise": "^4.2.8",
     "fetch-polyfill": "^0.8.2",
     "react": "^17.0.1",
@@ -35,9 +36,7 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "iOS 9"
     ],
     "development": [
       "last 1 chrome version",
